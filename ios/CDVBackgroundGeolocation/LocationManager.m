@@ -382,24 +382,10 @@ enum {
 
 - (void) flushQueue
 {
-    // Sanity-check the duration of last bgTask:  If greater than 30s, kill it.
-    if (bgTask != UIBackgroundTaskInvalid) {
-        if (-[lastBgTaskAt timeIntervalSinceNow] > 30.0) {
-            DDLogWarn(@"LocationManager#flushQueue has to kill an out-standing background-task!");
-            if (_config.isDebugging) {
-                [self notify:@"Outstanding bg-task was force-killed"];
-            }
-            [self stopBackgroundTask];
-        }
-        return;
-    }
 
     if ([locationQueue count] < 1) {
         return;
     }
-
-    // Create a background-task and delegate to Javascript for syncing location
-    bgTask = [self createBackgroundTask];
 
     Location *location = nil;
     @synchronized(self) {
@@ -412,6 +398,21 @@ enum {
     if (location == nil) return;
 
     [self sync:location];
+
+    // Sanity-check the duration of last bgTask:  If greater than 30s, kill it.
+    if (bgTask != UIBackgroundTaskInvalid) {
+        if (-[lastBgTaskAt timeIntervalSinceNow] > 30.0) {
+            DDLogWarn(@"LocationManager#flushQueue has to kill an out-standing background-task!");
+            if (_config.isDebugging) {
+                [self notify:@"Outstanding bg-task was force-killed"];
+            }
+            [self stopBackgroundTask];
+        }
+        return;
+    }
+
+    // Create a background-task and delegate to Javascript for syncing location
+    bgTask = [self createBackgroundTask];
 
     if (![location.type isEqual: @"current"]) {
         return;
