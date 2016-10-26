@@ -594,7 +594,7 @@ enum {
         // We should have a good sample for speed now, power down our GPS as configured by user.
         isAcquiringSpeed = NO;
         locationManager.desiredAccuracy = _config.desiredAccuracy;
-        locationManager.distanceFilter = [self calculateDistanceFilter:[bestLocation.speed floatValue]];
+        locationManager.distanceFilter = _config.distanceFilter;
         [self startUpdatingLocation];
 
     } else if (actAsInMode == FOREGROUND) {
